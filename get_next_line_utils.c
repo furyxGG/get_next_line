@@ -6,20 +6,38 @@
 /*   By: fyagbasa <fyagbasa@student.42istanbul.com  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/26 05:36:21 by fyagbasa          #+#    #+#             */
-/*   Updated: 2025/07/03 07:42:32 by fyagbasa         ###   ########.fr       */
+/*   Updated: 2025/07/06 07:35:11 by fyagbasa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-int		ft_strlen(const char *s)
+size_t	ft_strlen(const char *s)
 {
 	int	a;
 
+	if (!s)
+		return (0);
 	a = 0;
 	while (s[a])
 		a++;
 	return (a);
+}
+
+void	ft_addall(char **allfile, int fd)
+{
+	char	buff[BUFFER_SIZE + 1];
+	int		bytes;
+
+	*allfile = (char *)malloc(1);
+	*allfile[0] = '\0';
+	bytes = read(fd, buff, BUFFER_SIZE);
+	while (bytes > 0)
+	{
+		buff[bytes] = '\0';
+		*allfile = ft_strjoin(*allfile, buff);
+		bytes = read(fd, buff, BUFFER_SIZE);
+	}
 }
 
 char	*ft_strchr(char *s, char c)
@@ -41,6 +59,11 @@ char	*ft_strjoin(char *s1, char *s2)
 	int		a;
 	int		b;
 
+	if (!s1)
+	{
+		s1 = (char *)malloc (1 * sizeof(char));
+		s1[0] = '\0';
+	}
 	str = (char *)malloc((ft_strlen(s1) + ft_strlen(s2) + 1) * sizeof(char));
 	if (!str)
 		return (NULL);
@@ -57,49 +80,31 @@ char	*ft_strjoin(char *s1, char *s2)
 	return (str);
 }
 
-char	*ft_addall(int fd)
-{
-	char	buff[BUFFER_SIZE + 1];
-	char	*allfile;
-	int		bytes;
-
-	allfile = (char *)malloc(1);
-	allfile[0] = '\0';
-	bytes = read(fd, buff, BUFFER_SIZE);
-	while (bytes > 0)
-	{
-		buff[bytes] = '\0';
-		allfile = ft_strjoin(allfile, buff);
-		bytes = read(fd, buff, BUFFER_SIZE);
-	}
-	return (allfile);
-}
-
 char	*ft_substr(char const *s, unsigned int start, size_t len)
 {
-		char	*subptr;
-		size_t 	a;
+	char	*subptr;
+	size_t	a;
 
-		a = 0;
-		if (!s)
-			return (0);
-		if (start >= ft_strlen(s))
-		{
-			subptr = (char *)malloc(1 * sizeof(char));
-			if (!subptr)
-				return (0);
-			subptr[0] = '\0';
-			return (subptr);
-		}
-		if (len > ft_strlen(s) - start)
-			len = ft_strlen(s) - start;
-		subptr = (char *)malloc(sizeof(char) * (len + 1));
+	a = 0;
+	if (!s)
+		return (0);
+	if (start >= ft_strlen(s))
+	{
+		subptr = (char *)malloc(1 * sizeof(char));
 		if (!subptr)
 			return (0);
-		while (a < len)
-		{
-			subptr[a++] = s[start++];
-		}
-		subptr[a] = '\0';
+		subptr[0] = '\0';
 		return (subptr);
+	}
+	if (len > ft_strlen(s) - start)
+		len = ft_strlen(s) - start;
+	subptr = (char *)malloc(sizeof(char) * (len + 1));
+	if (!subptr)
+		return (0);
+	while (a < len)
+	{
+		subptr[a++] = s[start++];
+	}
+	subptr[a] = '\0';
+	return (subptr);
 }

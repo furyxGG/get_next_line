@@ -6,44 +6,69 @@
 /*   By: fyagbasa <fyagbasa@student.42istanbul.com  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/26 05:35:59 by fyagbasa          #+#    #+#             */
-/*   Updated: 2025/07/03 14:05:26 by fyagbasa         ###   ########.fr       */
+/*   Updated: 2025/07/06 07:34:19 by fyagbasa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
+static char	*takedata(int fd, char *allines)
+{
+	char	*buff;
+	int		bytesize;
+
+	buff = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
+	if (!buff)
+		return (NULL);
+	bytesize = 1;
+	while (!ft_strchr(allines, '\n') && bytesize > 0)
+	{
+		bytesize = read(fd, buff, BUFFER_SIZE);
+		if (bytesize == -1)
+		{
+			free(allines);
+			free(buff);
+			return (NULL);
+		}
+		buff[bytesize] = '\0';
+		allines = ft_strjoin(allines, buff);
+	}
+	free(buff);
+	return (allines);
+}
+
+static char	*giveline(char **allines)
+{
+	char	*newpos;
+	char	*line;
+	int		a;
+
+	a = 0;
+	while ((*allines)[a] && (*allines)[a] != '\n')
+		a++;
+	if ((*allines)[a] == '\n')
+		a++;
+	line = ft_substr(*allines, 0, a);
+	newpos = ft_substr(*allines, a, ft_strlen(*allines) - a);
+	free(*allines);
+	*allines = newpos;
+	return (line);
+}
+
 char	*get_next_line(int fd)
 {
 	static char	*allines;
 	char		*line;
-	char		*temp;
-	int 		bytesize;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	if (!allines)
-		allines = ft_addall(fd);
-	if (!allines)
-		return (NULL);
-	temp = ft_strchr(allines, '\n');
-	if (temp)
-		bytesize = temp - allines + 1;
-	else
-		bytesize = ft_strlen(allines);
-	line = ft_substr(allines, 0, bytesize);
-	if ()
+	allines = takedata(fd, allines);
+	if (!allines || allines[0] == '\0')
 	{
-		
+		free(allines);
+		allines = NULL;
+		return (NULL);
 	}
-	//free(temp);
+	line = giveline(&allines);
 	return (line);
-}
-
-int main()
-{
-	int fd = open("deneme.txt", O_RDONLY);
-
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
 }
